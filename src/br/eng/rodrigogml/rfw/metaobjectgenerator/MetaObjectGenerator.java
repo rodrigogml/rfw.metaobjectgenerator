@@ -41,7 +41,7 @@ import org.eclipse.text.edits.TextEdit;
 
 public class MetaObjectGenerator extends IncrementalProjectBuilder {
 
-  public static final String BUILDER_ID = "br.eng.rodrigogml.rfw.metaobjectgenerator.MetaObjectGenerator";
+  public static final String BUILDER_ID = "br.eng.rodrigogml.rfw.RFWMetaObjectGenerator";
 
   @SuppressWarnings("rawtypes")
   @Override

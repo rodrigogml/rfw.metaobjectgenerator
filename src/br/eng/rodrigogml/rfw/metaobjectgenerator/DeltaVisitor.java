@@ -18,8 +18,10 @@ public class DeltaVisitor implements IResourceDeltaVisitor {
 
   @Override
   public boolean visit(IResourceDelta res) throws CoreException {
-    if (res.getResource().getName().endsWith("VO.java") && !res.getResource().getName().endsWith("RFWVO.java")) {
-      MetaObjectGenerator.createMOForResource(res.getResource(), this.project, this.monitor);
+    if (res.getResource().getName().endsWith("VO.java")) {
+      if (!res.getResource().getName().endsWith("RFWVO.java")) {
+        MetaObjectGenerator.createMOForResource(res.getResource(), this.project, this.monitor);
+      }
     }
     return true; // Retorna true para continuar recebendo as notificações nos packages filhos
   }

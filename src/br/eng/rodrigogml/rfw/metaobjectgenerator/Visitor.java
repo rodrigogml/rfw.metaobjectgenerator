@@ -18,8 +18,10 @@ public class Visitor implements IResourceVisitor {
 
   @Override
   public boolean visit(IResource res) throws CoreException {
-    if (res.getName().endsWith("VO.java") && !res.getName().endsWith("RFWVO.java")) {
-      MetaObjectGenerator.createMOForResource(res, this.project, this.monitor);
+    if (res.getName().endsWith("VO.java")) {
+      if (!res.getName().endsWith("RFWVO.java")) {
+        MetaObjectGenerator.createMOForResource(res, this.project, this.monitor);
+      }
     }
     return true;
   }
