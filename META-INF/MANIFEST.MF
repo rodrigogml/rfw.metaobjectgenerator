@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: MetaObjectGenerator
 Bundle-ManifestVersion: 2
 Bundle-Name: MetaObjectGenerator
 Bundle-SymbolicName: MetaObjectGenerator;singleton:=true
@@ -12,5 +13,4 @@ Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.resources;bu
  sion="3.108.0",org.eclipse.core.expressions;bundle-version="3.5.100",
  org.eclipse.jdt.core;bundle-version="3.12.1",org.eclipse.text;bundle-
  version="3.6.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-
+Bundle-RequiredExecutionEnvironment: JavaSE-17
