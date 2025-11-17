@@ -246,7 +246,7 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
       for (String field : voData.methodGet) {
         String type = i.next();
         if (!doneAttributes.contains(field)) {
-          methods.append(System.lineSeparator()).append("/**").append(System.lineSeparator()).append(" * Este método foi gerado a partir de um método GET. É possível que ele seja apenas um método somente de leitura.").append(System.lineSeparator()).append(" */").append(System.lineSeparator());
+          methods.append(System.lineSeparator()).append("/**").append(System.lineSeparator()).append(" * Este metodo foi gerado a partir de um metodo GET. E possivel que ele seja um metodo somente de leitura.").append(System.lineSeparator()).append(" */").append(System.lineSeparator());
           // Avaliamos o retorno do método para saber o tipo de métodos que vamos criar
           if (type.endsWith("VO")) { // Retorna um VO
             createMethodVO_(methods, field, type);
@@ -289,7 +289,7 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
       // Incluimos todos os imports
       sbClass.append(imports);
       // Comentário da Classe avisando sobre a autogeração da Classe
-      sbClass.append(lineSep).append("// Esta classe foi gerada utilizando o MetaObjectGenerator em ").append(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date())).append(". Não edite!").append(lineSep);
+      sbClass.append(lineSep).append("// Esta classe foi gerada utilizando o MetaObjectGenerator em ").append(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date())).append(". Nao edite!").append(lineSep);
       // Abrimos a Classe
       sbClass.append("public class ").append(voData.className).append("_ extends RFWVO_ {");
       // inclui o SerialID

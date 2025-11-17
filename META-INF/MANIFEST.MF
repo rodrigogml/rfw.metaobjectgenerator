@@ -3,7 +3,7 @@ Automatic-Module-Name: MetaObjectGenerator
 Bundle-ManifestVersion: 2
 Bundle-Name: MetaObjectGenerator
 Bundle-SymbolicName: MetaObjectGenerator;singleton:=true
-Bundle-Version: 3.0.0
+Bundle-Version: 3.0.1
 Bundle-ClassPath: .,src
 Bundle-Localization: plugin
 Export-Package: br.eng.rodrigogml.rfw.metaobjectgenerator;version="1.0.0"
