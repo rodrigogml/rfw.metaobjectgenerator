@@ -23,7 +23,7 @@ public class DeltaVisitor implements IResourceDeltaVisitor {
         MetaObjectGenerator.createMOForResource(res.getResource(), this.project, this.monitor);
       }
     }
-    return true; // Retorna true para continuar recebendo as notificações nos packages filhos
+    return true; // Retorna true para continuar recebendo as notificaÃ§Ãµes nos packages filhos
   }
 
 }

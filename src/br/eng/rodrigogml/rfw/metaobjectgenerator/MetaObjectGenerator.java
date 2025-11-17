@@ -79,10 +79,10 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
   public static void createMOForResource(IResource res, IProject project, IProgressMonitor monitor) throws CoreException {
     String voPath = res.getLocation().toString();
     try {
-      // lÍ o conte˙do do resource (Classe VO)
+      // l√™ o conte√∫do do resource (Classe VO)
       final byte[] encoded = Files.readAllBytes(Paths.get(voPath));
 
-      // Faz o parser do VO para processar seu conte˙do e obter as informaÁıes necess·rias para criar a classe do MetaObject_
+      // Faz o parser do VO para processar seu conte√∫do e obter as informa√ß√µes necess√°rias para criar a classe do MetaObject_
       final ASTParser parser = ASTParser.newParser(AST.JLS12);
       parser.setSource(new String(encoded).toCharArray());
       final CompilationUnit vo = (CompilationUnit) parser.createAST(null);
@@ -93,7 +93,7 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
           if (node.getName().getFullyQualifiedName().equals("serialVersionUID")) {
             voData.serialVersionUID = "" + node.getInitializer();
           } else if (node.getName().getFullyQualifiedName().equals("id")) {
-            // n„o faz nada, o mÈtodo do parametro id È definido na superclasse RFWVO_ n„o temos de fazer nada com esse atirbuto
+            // n√£o faz nada, o m√©todo do parametro id √© definido na superclasse RFWVO_ n√£o temos de fazer nada com esse atirbuto
           } else if (node.getParent() instanceof FieldDeclaration) {
             Type type = ((FieldDeclaration) node.getParent()).getType();
             if (type.toString().endsWith("VO")) {
@@ -106,7 +106,7 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
               voData.fieldMaps.add(node.getName().getFullyQualifiedName());
               voData.fieldMaps_Type.add(type.toString());
             } else {
-              // Se n„o È um Field ligado ‡ um VO, ou uma collection, tratamos como um field "comum"
+              // Se n√£o √© um Field ligado √† um VO, ou uma collection, tratamos como um field "comum"
               if (!(node.getParent().getParent() instanceof EnumDeclaration)) {
                 voData.fields.add(node.getName().getFullyQualifiedName());
               }
@@ -121,7 +121,7 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
             if (node.getName().getFullyQualifiedName().startsWith("get")) {
               if (node.getParent() instanceof TypeDeclaration) {
                 if ((((TypeDeclaration) node.getParent()).getModifiers() & Modifier.PUBLIC) > 0) {
-                  // Se o mÈtodo comeÁar com get e for p˙blido, separamos o resto do nome do mÈtodo e incluimos na lista de mÈtodos
+                  // Se o m√©todo come√ßar com get e for p√∫blido, separamos o resto do nome do m√©todo e incluimos na lista de m√©todos
                   final String attribName = node.getName().getFullyQualifiedName().substring(3, 4).toLowerCase() + node.getName().getFullyQualifiedName().substring(4);
                   if (!"id".equals(attribName)) {
                     voData.methodGet.add(attribName);
@@ -163,20 +163,20 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
 
       });
 
-      // Se tiver definido o parametro para pular a classe durante o parser, j· abortamos o mÈtodo
+      // Se tiver definido o parametro para pular a classe durante o parser, j√° abortamos o m√©todo
       if (voData.skip) return;
 
-      // ## Depois do Parser do VO e com todas as vari·veis prontas sÛ falta montar o conte˙do da classe e salvar
-      // Primeiro passo È montar os mÈtodos, e a medida que encontramos VOs, tambÈm declamos os imports
+      // ## Depois do Parser do VO e com todas as vari√°veis prontas s√≥ falta montar o conte√∫do da classe e salvar
+      // Primeiro passo √© montar os m√©todos, e a medida que encontramos VOs, tamb√©m declamos os imports
       StringBuilder imports = new StringBuilder();
       StringBuilder methods = new StringBuilder();
       StringBuilder constFields = new StringBuilder();
 
-      // J· iniciamos o imports com o import do RFWVO_ utilizando como base o import do RFWVO que normalmente h· em todos os VOs
-      final String rfwvo = voData.imports.get("RFWVO"); // Retorna nulo caso n„o tenha o Import para o RFWVO. Isso pode acontecer se a classe estiver no mesmo package
+      // J√° iniciamos o imports com o import do RFWVO_ utilizando como base o import do RFWVO que normalmente h√° em todos os VOs
+      final String rfwvo = voData.imports.get("RFWVO"); // Retorna nulo caso n√£o tenha o Import para o RFWVO. Isso pode acontecer se a classe estiver no mesmo package
       if (rfwvo != null) imports.append("import ").append(rfwvo).append("_;");
 
-      // Lista com os atributos j· feitos para evitar que sejam criados mais de uma vez, principalmente por conta da detecÁ„o de campos e mÈtodos GET do VO
+      // Lista com os atributos j√° feitos para evitar que sejam criados mais de uma vez, principalmente por conta da detec√ß√£o de campos e m√©todos GET do VO
       final ArrayList<String> doneAttributes = new ArrayList<>();
 
       // Cria os campos normais
@@ -200,17 +200,17 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
       i = voData.fieldLists_Type.iterator();
       for (String field : voData.fieldLists) {
         String type = i.next();
-        // Para o campo do tipo Lista temos que verifica o tipo dentro da lista, se for um VO temos que criar mÈtodos no padr„o do VO_ e n„o de retorno de String
+        // Para o campo do tipo Lista temos que verifica o tipo dentro da lista, se for um VO temos que criar m√©todos no padr√£o do VO_ e n√£o de retorno de String
         if (type.endsWith("VO>")) {
           type = type.substring(type.indexOf("<") + 1, type.lastIndexOf(">"));
           createMethodVO_(methods, field, type);
           createImport(voData, imports, type);
-          // Cria agora o mÈtodo capaz de receber o Ìndice da lista
+          // Cria agora o m√©todo capaz de receber o √≠ndice da lista
           createMethodListVO_(methods, field, type);
         } else {
-          // Se o tipo da lista n„o È um VO, criamos mÈtodos padrıes para o field
+          // Se o tipo da lista n√£o √© um VO, criamos m√©todos padr√µes para o field
           createMethod(methods, field);
-          // Cria agora o mÈtodo capaz de receber o Ìndice da lista
+          // Cria agora o m√©todo capaz de receber o √≠ndice da lista
           createMethodList(methods, field);
         }
         // Cria a constante com o nome do field
@@ -223,17 +223,17 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
       for (String field : voData.fieldMaps) {
         String type = i.next();
         String keytype = type.substring(type.indexOf("<") + 1, type.lastIndexOf(","));
-        // Para o campo do tipo Map temos que verifica o tipo dentro do Map, se for um VO temos que criar mÈtodos no padr„o do VO_ e n„o de retorno de String
+        // Para o campo do tipo Map temos que verifica o tipo dentro do Map, se for um VO temos que criar m√©todos no padr√£o do VO_ e n√£o de retorno de String
         if (type.endsWith("VO>")) {
           type = type.substring(type.indexOf(",") + 1, type.lastIndexOf(">"));
           createMethodVO_(methods, field, type);
           createImport(voData, imports, type);
-          // Cria agora o mÈtodo capaz de receber a chave do Map
+          // Cria agora o m√©todo capaz de receber a chave do Map
           createMethodMapVO_(methods, field, type, keytype);
         } else {
-          // Se o tipo da lista n„o È um VO, criamos mÈtodos padrıes para o field
+          // Se o tipo da lista n√£o √© um VO, criamos m√©todos padr√µes para o field
           createMethod(methods, field);
-          // Cria agora o mÈtodo capaz de receber a chave do Map
+          // Cria agora o m√©todo capaz de receber a chave do Map
           createMethodMap(methods, field, keytype);
         }
         // Cria a constante com o nome do field
@@ -241,13 +241,13 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
         doneAttributes.add(field);
       }
 
-      // Itera os mÈtodos get para ver que mÈtodos mais precisam ser gerados.
+      // Itera os m√©todos get para ver que m√©todos mais precisam ser gerados.
       i = voData.methodGet_Type.iterator();
       for (String field : voData.methodGet) {
         String type = i.next();
         if (!doneAttributes.contains(field)) {
-          methods.append(System.lineSeparator()).append("/**").append(System.lineSeparator()).append(" * Este mÈtodo foi gerado a partir de um mÈtodo GET. … possÌvel que ele seja apenas um mÈtodo somente de leitura.").append(System.lineSeparator()).append(" */").append(System.lineSeparator());
-          // Avaliamos o retorno do mÈtodo para saber o tipo de mÈtodos que vamos criar
+          methods.append(System.lineSeparator()).append("/**").append(System.lineSeparator()).append(" * Este m√©todo foi gerado a partir de um m√©todo GET. √â poss√≠vel que ele seja apenas um m√©todo somente de leitura.").append(System.lineSeparator()).append(" */").append(System.lineSeparator());
+          // Avaliamos o retorno do m√©todo para saber o tipo de m√©todos que vamos criar
           if (type.endsWith("VO")) { // Retorna um VO
             createMethodVO_(methods, field, type);
             createImport(voData, imports, type);
@@ -255,12 +255,12 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
             type = type.substring(type.indexOf("<") + 1, type.lastIndexOf(">"));
             createMethodVO_(methods, field, type);
             createImport(voData, imports, type);
-            // Cria agora o mÈtodo capaz de receber o Ìndice da lista
+            // Cria agora o m√©todo capaz de receber o √≠ndice da lista
             createMethodListVO_(methods, field, type);
-          } else if (type.toString().matches("List\\<.*\\>")) { // Retorna uma lista cujo tipo n„o seja um VO
-            // Se o tipo da lista n„o È um VO, criamos mÈtodos padrıes para o field
+          } else if (type.toString().matches("List\\<.*\\>")) { // Retorna uma lista cujo tipo n√£o seja um VO
+            // Se o tipo da lista n√£o √© um VO, criamos m√©todos padr√µes para o field
             createMethod(methods, field);
-            // Cria agora o mÈtodo capaz de receber o Ìndice da lista
+            // Cria agora o m√©todo capaz de receber o √≠ndice da lista
             createMethodList(methods, field);
           } else if (type.toString().matches("Map\\<.*,.*VO\\>")) { // Retorna um map cujo tipo seja um VO
             String keytype = type.substring(type.indexOf("<") + 1, type.lastIndexOf(","));
@@ -268,12 +268,12 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
             createMethodVO_(methods, field, type);
             createImport(voData, imports, type);
             createMethodMapVO_(methods, field, type, keytype);
-          } else if (type.toString().matches("Map\\<.*,.*VO\\>")) { // Retorna um map cujo tipo n„o seja um VO
+          } else if (type.toString().matches("Map\\<.*,.*VO\\>")) { // Retorna um map cujo tipo n√£o seja um VO
             String keytype = type.substring(type.indexOf("<") + 1, type.lastIndexOf(","));
             createMethod(methods, field);
             createMethodMap(methods, field, keytype);
           } else {
-            // Cria o mÈtodo para simular o atributo deste mÈtodo get que encontramos sem atributo.
+            // Cria o m√©todo para simular o atributo deste m√©todo get que encontramos sem atributo.
             createMethod(methods, field);
           }
         }
@@ -282,35 +282,35 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
 
       final String lineSep = System.getProperty("line.separator");
 
-      // StringBuilder com o conte˙do final do MetaObject_
+      // StringBuilder com o conte√∫do final do MetaObject_
       final StringBuilder sbClass = new StringBuilder(100);
       // Declaramos o package
       sbClass.append("package ").append(voData.pack).append(";");
       // Incluimos todos os imports
       sbClass.append(imports);
-      // Coment·rio da Classe avisando sobre a autogeraÁ„o da Classe
-      sbClass.append(lineSep).append("// Esta classe foi gerada utilizando o MetaObjectGenerator em ").append(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date())).append(". N„o edite!").append(lineSep);
+      // Coment√°rio da Classe avisando sobre a autogera√ß√£o da Classe
+      sbClass.append(lineSep).append("// Esta classe foi gerada utilizando o MetaObjectGenerator em ").append(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date())).append(". N√£o edite!").append(lineSep);
       // Abrimos a Classe
       sbClass.append("public class ").append(voData.className).append("_ extends RFWVO_ {");
       // inclui o SerialID
       sbClass.append("private static final long serialVersionUID = ").append(voData.serialVersionUID).append(";");
-      // inclui o instance do VO padr„o
+      // inclui o instance do VO padr√£o
       sbClass.append("public static final ").append(voData.className).append("_ vo() { return new ").append(voData.className).append("_(); }");
-      // Inclui o campo est·tido _id que È constante em todos os objetos
+      // Inclui o campo est√°tido _id que √© constante em todos os objetos
       sbClass.append("public final static String _id = \"id\";");
-      // Inclui os campos Est·ticos para referÍncia
+      // Inclui os campos Est√°ticos para refer√™ncia
       sbClass.append(constFields);
-      // Inclui o Construtor padr„o da classe
+      // Inclui o Construtor padr√£o da classe
       sbClass.append("private ").append(voData.className).append("_() { }");
       // Inclui o Construtor Personalizado
       sbClass.append("public ").append(voData.className).append("_(String basepath) { super(basepath); }");
-      // Inclui todos os mÈtodos criados
+      // Inclui todos os m√©todos criados
       sbClass.append(methods);
       // Fecha a classe
       sbClass.append("}");
 
       /*
-       * Formata o conte˙do da classe
+       * Formata o conte√∫do da classe
        */
       // take default Eclipse formatting options
       Map<?, ?> options = DefaultCodeFormatterConstants.getEclipseDefaultSettings();
@@ -357,11 +357,11 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
   }
 
   private static void createImport(final VOData voData, StringBuilder imports, String type) {
-    // Procura se temos um import para esse tipo. o import pode n„o existir se estiver no mesmo package, neste caso sÛ ignoramos
+    // Procura se temos um import para esse tipo. o import pode n√£o existir se estiver no mesmo package, neste caso s√≥ ignoramos
     String imp = voData.imports.get(type);
     if (imp != null) {
       imports.append("import ").append(imp).append("_;");
-      // Depois que o import j· foi criado removemos ele da hash para evitar que sejam criadas entradas duplicadas
+      // Depois que o import j√° foi criado removemos ele da hash para evitar que sejam criadas entradas duplicadas
       voData.imports.remove(type);
     }
   }
@@ -392,11 +392,11 @@ public class MetaObjectGenerator extends IncrementalProjectBuilder {
 }
 
 /**
- * Objeto simples para guardar as informaÁıes encontradas na classe do VO durante o parser para usar depois na composiÁ„o do VO_
+ * Objeto simples para guardar as informa√ß√µes encontradas na classe do VO durante o parser para usar depois na composi√ß√£o do VO_
  */
 class VOData {
   /**
-   * Se definido como True durate o parser do VO, a classe VO_ n„o deve ser gerada.
+   * Se definido como True durate o parser do VO, a classe VO_ n√£o deve ser gerada.
    */
   public boolean skip = false;
   /**
@@ -416,35 +416,35 @@ class VOData {
    */
   public String serialVersionUID = null;
   /**
-   * Hash com os imports encontrados. A chave da Hash È o nome do elemento sendo importado, o conte˙do È o importe completo.
+   * Hash com os imports encontrados. A chave da Hash √© o nome do elemento sendo importado, o conte√∫do √© o importe completo.
    */
   public HashMap<String, String> imports = new HashMap<>();
   /**
-   * Lista dos fields encontrados no VO para criaÁ„o dos mÈtodos do MetaObject_
+   * Lista dos fields encontrados no VO para cria√ß√£o dos m√©todos do MetaObject_
    */
   public ArrayList<String> fields = new ArrayList<>();
   /**
-   * Lista dos campos que s„o listas.
+   * Lista dos campos que s√£o listas.
    */
   public ArrayList<String> fieldLists = new ArrayList<>();
   /**
-   * Tipos dos campos que s„o listas. Esta Lista deve ser sincronizada sempre com a lista fieldLists.
+   * Tipos dos campos que s√£o listas. Esta Lista deve ser sincronizada sempre com a lista fieldLists.
    */
   public ArrayList<String> fieldLists_Type = new ArrayList<>();
   /**
-   * Lista dos campos que s„o Maps.
+   * Lista dos campos que s√£o Maps.
    */
   public ArrayList<String> fieldMaps = new ArrayList<>();
   /**
-   * Tipos dos campos que s„o Maps. Esta Lista deve ser sincronizada sempre com a lista fieldLists.
+   * Tipos dos campos que s√£o Maps. Esta Lista deve ser sincronizada sempre com a lista fieldLists.
    */
   public ArrayList<String> fieldMaps_Type = new ArrayList<>();
   /**
-   * Lista dos campos que s„o hashs.
+   * Lista dos campos que s√£o hashs.
    */
   public ArrayList<String> fieldHashs = new ArrayList<>();
   /**
-   * Lista dos campos que s„o MetaObjects.
+   * Lista dos campos que s√£o MetaObjects.
    */
   public ArrayList<String> fieldMetas = new ArrayList<>();
   /**
@@ -452,7 +452,7 @@ class VOData {
    */
   public ArrayList<String> fieldMetas_Type = new ArrayList<>();
   /**
-   * Lista dos mÈtodos GETs.
+   * Lista dos m√©todos GETs.
    */
   public ArrayList<String> methodGet = new ArrayList<>();
   /**
